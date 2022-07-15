@@ -1,5 +1,6 @@
+import math
 import requests
-import json
+from tqdm import tqdm
 import csv
 
 
@@ -53,34 +54,50 @@ def get_data():
         'x-requested-with': 'detmir-ui',
     }
 
-    page = 0
+    response = requests.get(
+        'https://api.detmir.ru/v2/products?filter=categories[].alias:lego;promo:false;withregion:RU-MOW&expand=meta.facet.ages.adults,meta.facet.gender.adults,webp&exclude=items&meta=*&limit=30',
+        cookies=cookies, headers=headers).json()
+
+    count_of_pages = response.get('meta')['length']
+    count_of_pages = math.ceil(count_of_pages / 30)
+
+    offset = 0
     city = 'RU-MOW'
+    loop = tqdm(total=count_of_pages, position=0, leave=False)
 
-    for i in range(5):
+    for i in range(count_of_pages):
+        try:
+            loop.set_description('Loading...'.format(i))
+            loop.update(1)
 
-        response = requests.get(
-            f'https://api.detmir.ru/v2/products?filter=categories[].alias:lego;promo:false;withregion:{city}&expand=meta.facet.ages.adults,meta.facet.gender.adults,webp&meta=*&limit=30&offset={page}&sort=popularity:desc',
-            cookies=cookies, headers=headers).json()
+            response = requests.get(
+                f'https://api.detmir.ru/v2/products?filter=categories[].alias:lego;promo:false;withregion:{city}&expand=meta.facet.ages.adults,meta.facet.gender.adults,webp&meta=*&limit=30&offset={offset}&sort=popularity:desc',
 
-        products_ids = response.get('items')
+                cookies=cookies, headers=headers).json()
 
-        for person in products_ids:
+            products_ids = response.get('items')
 
-            old_price = person.get('old_price')
+            for person in products_ids:
 
-            if old_price is None:
-                price = person.get('price')['price']
-            else:
-                price = old_price['price']
-                old_price = person.get('price')['price']
+                old_price = person.get('old_price')
 
-            with open('RU-MOW.csv', 'a') as file:
-                writer = csv.writer(file)
-                writer.writerow(
-                    [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
-                )
+                if old_price is None:
+                    price = person.get('price')['price']
+                else:
+                    price = old_price['price']
+                    old_price = person.get('price')['price']
 
-        page += 30
+                with open('RU-MOW.csv', 'a') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(
+                        [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
+                    )
+
+            offset += 30
+        except:
+            print(f"error in offset {offset}")
+
+    loop.close()
 
 
 def create_csv():
