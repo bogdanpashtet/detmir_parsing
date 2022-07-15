@@ -52,36 +52,44 @@ def get_data():
         'x-requested-with': 'detmir-ui',
     }
 
-    response = requests.get(
-        'https://api.detmir.ru/v2/recommendation/products?filter=category.id:40;placement:web_listing_popular;region.iso:RU-MOW&limit=30',
-        cookies=cookies, headers=headers).json()
-
-    products_ids = response.get('products')
-
+    page = 0
+    city = 'RU-MOW'
     product_list = []
 
-    for person in products_ids:
+    for ind in range(5):
 
-        old_price = person.get('old_price')
+        response = requests.get(
+            f'https://api.detmir.ru/v2/products?filter=categories[].alias:lego;promo:false;withregion:{city}&expand=meta.facet.ages.adults,meta.facet.gender.adults,webp&meta=*&limit=30&offset={page}&sort=popularity:desc',
+            cookies=cookies, headers=headers).json()
 
-        if old_price is None:
-            price = person.get('price')['price']
-        else:
-            price = old_price['price']
-            old_price = person.get('price')['price']
+        products_ids = response.get('items')
 
-        product_list.append(dict(
-            [
-                ('id', person.get('id')),
-                ('title', person.get('title')),
-                ('price', price),
-                ('promo_price', old_price),
-                ('url', person.get('link')['web_url']),
-            ]
-        ))
+        for person in products_ids:
 
-    with open('1.json', 'w') as file:
+            old_price = person.get('old_price')
+
+            if old_price is None:
+                price = person.get('price')['price']
+            else:
+                price = old_price['price']
+                old_price = person.get('price')['price']
+
+            product_list.append(dict(
+                [
+                    ('id', person.get('id')),
+                    ('title', person.get('title')),
+                    ('price', price),
+                    ('promo_price', old_price),
+                    ('url', person.get('link')['web_url']),
+                ]
+            ))
+
+        page += 30
+
+    with open('RU-MOW.json', 'w') as file:
         json.dump(product_list, file, indent=4, ensure_ascii=False)
+
+    print(len(product_list))
 
 
 def main():
