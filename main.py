@@ -87,14 +87,38 @@ def get_data():
                     price = old_price['price']
                     old_price = person.get('price')['price']
 
-                with open('RU-MOW.csv', 'a') as file:
-                    writer = csv.writer(file)
-                    writer.writerow(
-                        [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
-                    )
+                if 'RU-MOW' and 'RU-SPE' in person.get('available')['offline']['region_iso_codes']:
+
+                    with open('RU-MOW.csv', 'a') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(
+                            [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
+                        )
+
+                    with open('RU-SPE.csv', 'a') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(
+                            [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
+                        )
+
+                elif 'RU-MOW' in person.get('available')['offline']['region_iso_codes']:
+
+                    with open('RU-MOW.csv', 'a') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(
+                            [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
+                        )
+
+                elif 'RU-SPE' in person.get('available')['offline']['region_iso_codes']:
+
+                    with open('RU-SPE.csv', 'a') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(
+                            [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
+                        )
 
             offset += 30
-        except:
+        except ConnectionError:
             print(f"error in offset {offset}")
 
     loop.close()
@@ -102,6 +126,12 @@ def get_data():
 
 def create_csv():
     with open('RU-MOW.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ('id', 'title', 'price', 'promo_price', 'url')
+        )
+
+    with open('RU-SPE.csv', 'w') as file:
         writer = csv.writer(file)
         writer.writerow(
             ('id', 'title', 'price', 'promo_price', 'url')
