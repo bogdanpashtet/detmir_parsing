@@ -1,5 +1,6 @@
 import requests
 import json
+import csv
 
 
 def get_data():
@@ -54,9 +55,8 @@ def get_data():
 
     page = 0
     city = 'RU-MOW'
-    product_list = []
 
-    for ind in range(5):
+    for i in range(5):
 
         response = requests.get(
             f'https://api.detmir.ru/v2/products?filter=categories[].alias:lego;promo:false;withregion:{city}&expand=meta.facet.ages.adults,meta.facet.gender.adults,webp&meta=*&limit=30&offset={page}&sort=popularity:desc',
@@ -74,25 +74,25 @@ def get_data():
                 price = old_price['price']
                 old_price = person.get('price')['price']
 
-            product_list.append(dict(
-                [
-                    ('id', person.get('id')),
-                    ('title', person.get('title')),
-                    ('price', price),
-                    ('promo_price', old_price),
-                    ('url', person.get('link')['web_url']),
-                ]
-            ))
+            with open('RU-MOW.csv', 'a') as file:
+                writer = csv.writer(file)
+                writer.writerow(
+                    [person.get('id'), person.get('title'), price, old_price, person.get('link')['web_url']]
+                )
 
         page += 30
 
-    with open('RU-MOW.json', 'w') as file:
-        json.dump(product_list, file, indent=4, ensure_ascii=False)
 
-    print(len(product_list))
+def create_csv():
+    with open('RU-MOW.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ('id', 'title', 'price', 'promo_price', 'url')
+        )
 
 
 def main():
+    create_csv()
     get_data()
 
 

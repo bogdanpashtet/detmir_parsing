@@ -6,9 +6,9 @@
 
 Примеры ссылок на категории:
 
-https://www.detmir.ru/catalog/index/name/lego/
-https://www.detmir.ru/catalog/index/name/zdorovyj_perekus_pp/
-https://www.detmir.ru/catalog/index/name/accessori_car_interior/
+https://www.detmir.ru/catalog/index/name/lego/                      <br> 
+https://www.detmir.ru/catalog/index/name/zdorovyj_perekus_pp/       <br>
+https://www.detmir.ru/catalog/index/name/accessori_car_interior/    <br>
 
 Требуется извлечь:
 <ol>
